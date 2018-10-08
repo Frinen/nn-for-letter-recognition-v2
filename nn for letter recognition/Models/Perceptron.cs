@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace nn_for_letter_recognition.Models
 {
@@ -21,50 +22,56 @@ namespace nn_for_letter_recognition.Models
         public void Train (Dictionary<int, List<int>> TrainData, Dictionary<int, List<int>> Desires)
         {
 
-            for (int j = 0; j < 100000; j++)
+            for (int j = 0; j < 1000; j++)
             {
                 for (int t = 0; t < TrainData.Count; t++)
                 {
                     for (int i = 0; i < neurons.Count; i++)
                     {
                         neurons[i].Calcutale(TrainData[t]);
-                      //  neurons[i].CalculateEroor(Desires[t][i]);
-                        neurons[i].Correction();
+                        //  neurons[i].CalculateEroor(Desires[t][i]);
+                        // neurons[i].Correction();
+                        CalcError(Desires[t]);
+                        Correction(Desires[t]);
+                        
                     }
                 }
             }
-            
+            MessageBox.Show(Convert.ToString(Error));
+
         }
 
-        public bool CalcError(List<int> desires)
+        public void CalcError(List<int> desires)
         {
-            double tmp = Error;
-            Error=0;
+           
             for(int i=0;i<neurons.Count;i++)
             {
                 Error += Math.Pow((desires[i]-neurons[i].Output),2);
             }
             Error = Error * 0.5;
-            if(Error<tmp)
-            {
-                return true;
-            }
-            else
-            {
-                Error = tmp;
-                return false;
-            }
+            
         }
 
-        public void Correction()
+        public void Correction(List<int> desires)
         {
+            for(int i=0;i< desires.Count;i++)
+            {
+                double deltaWeight;
+                double neuronError;
+                neuronError = neurons[i].Output * (1 - neurons[i].Output) * (desires[i] - neurons[i].Output);
+                for (int j=0;j<neurons[i].Inputs.Count;j++)
+                {
 
+                    deltaWeight = neurons[i].Eta * neuronError * neurons[i].Inputs[j];
+                    neurons[i].Weights[j] += deltaWeight;
+                }
+            }
         }
 
         public string Evaluate(List <int> inputs)
         {
             string letterOut = "";
-            /*List<int> outputs = new List<int>();
+            List<double> outputs = new List<double>();
             char letter;
             for (int i = 0; i < neurons.Count; i++)
             {
@@ -75,9 +82,9 @@ namespace nn_for_letter_recognition.Models
                     letter =Convert.ToChar(97 + i);
                     letterOut += letter;
                 }
-                //letterOut += $"{outputs[i]} ";
+                letterOut += $"{outputs[i]} ";
             }
-            */
+            
             return letterOut;
         }
 
