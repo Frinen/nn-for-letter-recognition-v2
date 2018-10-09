@@ -19,7 +19,7 @@ namespace nn_for_letter_recognition.Models
             neurons = _neurons;
         }
 
-        public void Train (Dictionary<int, List<int>> TrainData, Dictionary<int, List<int>> Desires)
+        public void Train(Dictionary<int, List<int>> TrainData, Dictionary<int, List<double>> Desires)
         {
 
             for (int j = 0; j < 1000; j++)
@@ -33,7 +33,7 @@ namespace nn_for_letter_recognition.Models
                         // neurons[i].Correction();
                         CalcError(Desires[t]);
                         Correction(Desires[t]);
-                        
+
                     }
                 }
             }
@@ -41,34 +41,34 @@ namespace nn_for_letter_recognition.Models
 
         }
 
-        public void CalcError(List<int> desires)
+        public void CalcError(List<double> desires)
         {
-           
-            for(int i=0;i<neurons.Count;i++)
+            Error = 0;
+            for (int i = 1; i < neurons.Count; i++)
             {
-                Error += Math.Pow((desires[i]-neurons[i].Output),2);
+                Error += Convert.ToDouble(Math.Pow((desires[i] - neurons[i].Output), 2));
             }
             Error = Error * 0.5;
-            
+
         }
 
-        public void Correction(List<int> desires)
+        public void Correction(List<double> desires)
         {
-            for(int i=0;i< desires.Count;i++)
+            for (int i = 0; i < desires.Count; i++)
             {
                 double deltaWeight;
                 double neuronError;
-                neuronError = neurons[i].Output * (1 - neurons[i].Output) * (desires[i] - neurons[i].Output);
-                for (int j=0;j<neurons[i].Inputs.Count;j++)
+                neuronError = Convert.ToDouble(neurons[i].Output * (1.0 - neurons[i].Output) * (desires[i] - neurons[i].Output));
+                for (int j = 0; j < neurons[i].Inputs.Count; j++)
                 {
 
-                    deltaWeight = neurons[i].Eta * neuronError * neurons[i].Inputs[j];
+                    deltaWeight = Convert.ToDouble(neurons[i].Eta * neuronError * neurons[i].Inputs[j]);
                     neurons[i].Weights[j] += deltaWeight;
                 }
             }
         }
 
-        public string Evaluate(List <int> inputs)
+        public string Evaluate(List<int> inputs)
         {
             string letterOut = "";
             List<double> outputs = new List<double>();
@@ -77,14 +77,25 @@ namespace nn_for_letter_recognition.Models
             {
                 neurons[i].Calcutale(inputs);
                 outputs.Add(neurons[i].Output);
-                if(neurons[i].Output == 1)
+               /* if (neurons[i].Output == 1)
                 {
-                    letter =Convert.ToChar(97 + i);
+                    letter = Convert.ToChar(97 + i);
                     letterOut += letter;
-                }
+                }*/
                 letterOut += $"{outputs[i]} ";
             }
-            
+            int index=0;
+            double max = outputs[0];
+            for (int i = 0; i < neurons.Count; i++)
+            {
+                if(max < outputs[i])
+                {
+                    max = outputs[i];
+                    index = i;
+                }
+            }
+            letter = Convert.ToChar(97 + index);
+            letterOut += letter;
             return letterOut;
         }
 
@@ -97,7 +108,7 @@ namespace nn_for_letter_recognition.Models
                 {
                     foreach (var neuron in neurons)
                     {
-                        foreach(var weight in neuron.Weights)
+                        foreach (var weight in neuron.Weights)
                         {
                             sw.WriteLine(weight);
                         }
@@ -120,12 +131,12 @@ namespace nn_for_letter_recognition.Models
                     string line;
                     for (int i = 0; i < neurons.Count; i++)
                     {
-                        for(int j = 0; j<neurons[i].Weights.Count; j++)
+                        for (int j = 0; j < neurons[i].Weights.Count; j++)
                         {
                             line = sr.ReadLine();
                             neurons[i].Weights[j] = Convert.ToDouble(line);
                         }
-                        
+
 
                     }
                 }

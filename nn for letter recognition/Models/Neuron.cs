@@ -16,20 +16,20 @@ namespace nn_for_letter_recognition.Models
 
         public Neuron()
         {
-            Eta = 0.3;
+            Eta = 0.7;
             Inputs = new List<int>();
             Weights = new List<double>();
             Random rnd = new Random();
-            for(int i = 0; i <26; i++)
+            for (int i = 0; i < 26; i++)
             {
-                
-                if(i==0)
+
+                if (i == 0)
                 {
-                    Weights.Add(rnd.Next(10) * -1);
+                    Weights.Add(rnd.NextDouble() * -1);
                 }
                 else
                 {
-                    Weights.Add(rnd.Next(10));
+                    Weights.Add(rnd.NextDouble());
                 }
             }
 
@@ -39,7 +39,7 @@ namespace nn_for_letter_recognition.Models
             double Sum = 0;
             for (int i = 0; i < Inputs.Count; i++)
             {
-                Sum += Inputs[i] * Weights[i];
+                Sum += Convert.ToDouble( Inputs[i] * Weights[i]);
             }
             return Sum;
         }
@@ -48,21 +48,24 @@ namespace nn_for_letter_recognition.Models
         {
             Inputs = list;
             double Sum = FindSum();
-            Output = 1 / (1+ Math.Pow( 2.718, Sum*-1));
-            
+            double tmp1 = Math.Pow(2.718, Sum * -1.0);
+            double tmp2 = 1.0;
+            double tmp3 = tmp1 + tmp2;
+            Output = 1.0 / tmp3;
+
         }
 
         public void CalculateEroor(List<int> desire)
         {
             // Error = desire - Output;
-            
+
         }
 
-        public void Correction ()
+        public void Correction()
         {
-            for (int i=0;i<26;i++)
+            for (int i = 0; i < 26; i++)
             {
-                if(i == 0)
+                if (i == 0)
                 {
                     Weights[i] = Weights[i] + Eta * Error;
                 }
@@ -73,5 +76,6 @@ namespace nn_for_letter_recognition.Models
             }
         }
     }
-
 }
+
+
